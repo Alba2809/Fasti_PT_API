@@ -4,7 +4,7 @@ import { SaleModel } from "../models/sale.model.js";
 
 export const create = async (req, res) => {
   try {
-    const { productId, amount: amountInput, total } = req.body;
+    const { productId, amount: amountInput } = req.body;
     const userId = req.user.id;
 
     // check if the amount is a integer
@@ -14,7 +14,6 @@ export const create = async (req, res) => {
     }
 
     // check if the product exists and if the product has enough stock
-console.log(productId)
     const productFound = await ProductModel.getById(productId);
 
     if (!productFound) return res.status(400).json(["Producto no encontrado."]);
@@ -26,7 +25,7 @@ console.log(productId)
       userId,
       productId,
       amount,
-      total,
+      total: amount * productFound.sale_cost,
     });
 
     // if the insert is failed

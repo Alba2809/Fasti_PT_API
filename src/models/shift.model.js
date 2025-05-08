@@ -10,6 +10,6 @@ export class ShiftModel {
   static async getById(id) {
     const [shift] = await pool.query(`SELECT * FROM shifts WHERE id = ?`, [id]);
 
-    return shift;
+    return shift[0];
   }
 }

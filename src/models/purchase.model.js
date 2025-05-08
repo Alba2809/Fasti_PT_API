@@ -11,6 +11,7 @@ export class PurchaseModel {
         ON u.roleId = r.id 
         JOIN products pr 
         ON pu.productId = pr.id
+        ORDER BY pu.createdAt DESC
         `);
 
     const purchasesReestructured = purchases.map((purchase) => {

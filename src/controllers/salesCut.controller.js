@@ -16,30 +16,45 @@ export const create = async (req, res) => {
   try {
     const { shiftId, date } = req.body;
     const userId = req.user.id;
+    console.log(typeof date);
 
-    if ( !userId ) return res.status(400).json(["Autenticación requerida."]);
+    if (!userId) {
+      return res.status(400).json(["Autenticación requerida."]);
+    }
 
     // check if the shift exists
     const shift = await ShiftModel.getById(shiftId);
 
-    if ( !shift ) return res.status(400).json(["Turno no encontrado."]);
+    if (!shift) {
+      return res.status(400).json(["Turno no encontrado."]);
+    }
+    const { start_time, end_time } = shift;
+
+    // check if already exists a sales cut for the same shift and date
+    const salesCut = await SalesCutModel.getByShiftAndDate(shiftId, date);
+
+    if (salesCut) {
+      return res.status(400).json(["Ya existe un corte para este turno y fecha."]);
+    }
 
     // get sales made by the shift, between the start and end time of the shift and the date
-    const sales = await SaleModel.salesByShift({ start_time: shift.start_time, end_time: shift.end_time, date });
+    const totalSold = await SaleModel.salesByShift({ start_time, end_time, date });
 
-    // calculate the total sold
-    const totalSold = sales.reduce((acc, sale) => acc + sale.total, 0);
+    if (!totalSold || totalSold === 0) {
+      return res.status(400).json(["No hay ventas para el corte."]);
+    }
 
     // create the sales cut
     const result = await SalesCutModel.create({
       userId,
       shiftId,
       totalSold,
-      date
+      date,
     });
 
     res.status(200).json(result);
   } catch (error) {
+    console.log(error);
     res.status(500).json(["Hubo un error al crear el corte de ventas."]);
   }
 };

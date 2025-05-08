@@ -2,15 +2,14 @@ import { pool } from "../db.js";
 
 export class SalesCutModel {
   static async getAll() {
-    const [salesCuts] = await pool.query(
-      `
-            SELECT sc.id, sc.total_sold, sc.date, sc.createdAt, sc.userId, u.username, u.roleId, r.name, s.name AS shift_name
+    const [salesCuts] = await pool.query(`
+            SELECT sc.id, sc.total_sold, sc.date, sc.createdAt, sc.userId, u.username, u.roleId, r.name AS role_name, s.name AS shift_name
             FROM sales_cuts sc
             JOIN users u ON sc.userId = u.id
             JOIN roles r ON u.roleId = r.id
             JOIN shifts s ON sc.shiftId = s.id
-            `
-    );
+            ORDER BY sc.date DESC
+            `);
 
     const salesCutsReestructured = salesCuts.map((salesCut) => {
       return {
@@ -23,7 +22,7 @@ export class SalesCutModel {
           username: salesCut.username,
           role: {
             id: salesCut.roleId,
-            name: salesCut.name,
+            name: salesCut.role_name,
           },
         },
         shift: {
@@ -39,45 +38,18 @@ export class SalesCutModel {
   static async create({ userId, shiftId, totalSold, date }) {
     const [result] = await pool.query(
       "INSERT INTO sales_cuts (userId, shiftId, total_sold, date) VALUES (?, ?, ?, ?)",
-      [userId, shiftId, totalSold, date]
+      [userId, +shiftId, totalSold, date]
     );
 
     return result;
   }
 
-  static async getById(id) {
+  static async getByShiftAndDate(shiftId, date) {
     const [salesCut] = await pool.query(
-      `
-      SELECT sc.id, sc.total_sold, sc.date, sc.createdAt, sc.userId, u.username, u.roleId, r.name, s.name AS shift_name 
-      FROM sales_cuts sc
-      JOIN users u ON sc.userId = u.id
-      JOIN roles r ON u.roleId = r.id
-      JOIN shifts s ON sc.shiftId = s.id
-      WHERE sc.id = ?
-      `,
-      [id]
+      `SELECT * FROM sales_cuts WHERE shiftId = ? AND date = ?`,
+      [shiftId, date]
     );
 
-    if (!salesCut) return null;
-
-    const salesCutReestructured = {
-      id: salesCut.id,
-      totalSold: salesCut.total_sold,
-      createdAt: salesCut.createdAt,
-      user: {
-        id: salesCut.userId,
-        username: salesCut.username,
-        role: {
-          id: salesCut.roleId,
-          name: salesCut.name,
-        },
-      },
-      shift: {
-        id: salesCut.shiftId,
-        name: salesCut.shift_name,
-      },
-    };
-
-    return salesCutReestructured;
+    return salesCut[0];
   }
 }
