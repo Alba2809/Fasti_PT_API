@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+// define the schema for the login request
 export const loginSchema = z.object({
   username: z
     .string({

@@ -8,7 +8,7 @@ export class SalesCutModel {
             JOIN users u ON sc.userId = u.id
             JOIN roles r ON u.roleId = r.id
             JOIN shifts s ON sc.shiftId = s.id
-            ORDER BY sc.date DESC
+            ORDER BY sc.date DESC, sc.createdAt DESC
             `);
 
     const salesCutsReestructured = salesCuts.map((salesCut) => {

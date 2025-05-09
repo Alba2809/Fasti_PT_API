@@ -1,10 +1,10 @@
-import { pool } from "../db.js";
 import bcrypt from "bcryptjs";
 import { RoleModel } from "../models/role.model.js";
 import { UserModel } from "../models/user.model.js";
 import { ProductModel } from "../models/product.model.js";
 
-// insert the initial roles and users into the database
+// insert the initial roles, users, and products into the database
+
 export const createRoles = async () => {
   try {
     const roles = await RoleModel.getAll();
@@ -16,6 +16,8 @@ export const createRoles = async () => {
       RoleModel.create("gerente"),
       RoleModel.create("cajero"),
     ]);
+
+    console.log("Roles de prueba insertados");
   } catch (error) {
     console.log(error);
   }
@@ -46,6 +48,8 @@ export const createUsers = async () => {
         role: roles.find((role) => role.name === "cajero").id,
       }),
     ]);
+
+    console.log("Usuarios de prueba insertados");
   } catch (error) {
     console.log(error);
   }
@@ -158,6 +162,8 @@ export const createProducts = async () => {
         sale_cost: 5,
       }),
     ]);
+
+    console.log("Productos de prueba insertados");
   } catch (error) {
     console.log("Error al insertar los productos: " + error);
   }

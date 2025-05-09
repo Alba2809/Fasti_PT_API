@@ -10,6 +10,7 @@ export class LogModel {
       ON l.userId = u.id
       JOIN roles r 
       ON u.roleId = r.id
+      ORDER BY l.createdAt DESC
       `
     );
 
